@@ -164,7 +164,7 @@ const createCart = () => {
       const changeQté = document.getElementsByClassName("itemQuantity");
       const changeQtéArray = [...changeQté];
 
-      changeQtéArray.forEach((input, index) => {
+      changeQtéArray.forEach((input) => {
         input.addEventListener("change", function (e) {
           const productID = e.target.closest(".cart__item").dataset.id;
           const productColor = e.target.closest(".cart__item").dataset.color;
