@@ -1,4 +1,4 @@
-//Functions
+//Get data functions
 const getCart = () => {
   if (localStorage.getItem("cart") !== null) {
     return JSON.parse(localStorage.getItem("cart"));
@@ -11,88 +11,10 @@ const fetchProduct = async (id) => {
   return await fetch(url).then((response) => response.json());
 };
 
-const isDupplicate = (entry, newCart) => {
-  return newCart.some((x) => entry.id == x.id && entry.color == x.color);
-};
+//Create HTML functions
+const createArticles = async (item) => {
+  const product = await fetchProduct(item.id);
 
-const calculPrice = (quantity, price) => {
-  return quantity * price;
-};
-
-const addQuantity = (entry, arr) => {
-  arr.forEach((x) => {
-    if (x.id === entry.id && x.color === entry.color) {
-      x.quantity = parseInt(x.quantity) + parseInt(entry.quantity);
-      x.quantity = x.quantity.toString();
-    }
-  });
-};
-
-const createCart = async (cart) => {
-  let TTPrice = 0;
-  let newCart = [];
-  for (const entry of cart) {
-    if (!isDupplicate(entry, newCart)) {
-      newCart.push(entry);
-    } else {
-      addQuantity(entry, newCart);
-    }
-  }
-
-  for (let i = 0; i <= newCart.length - 1; i++) {
-    product = await fetchProduct(newCart[i].id);
-    createArticles(product, newCart[i]);
-    TTPrice += calculPrice(newCart[i].quantity, product.price);
-  }
-
-  const totalPrice = document.getElementById("totalPrice");
-  totalPrice.innerHTML = TTPrice;
-
-  return newCart;
-};
-
-const delProduct = (id) => {
-  for (let i = 0; i < cart.length; i++) {
-    if (cart[i].id === id) {
-      cart.splice(i, 1);
-    }
-  }
-  localStorage.setItem("cart", JSON.stringify(cart));
-  document.location.reload(true);
-};
-
-const changeQte = (e, cart, index) => {
-  cart[index].quantity = e.target.value;
-  localStorage.setItem("cart", JSON.stringify(cart));
-  document.location.reload(true);
-};
-
-const createHTML = (cart) => {
-  if (cart && cart.length) {
-    createCart(cart).then((newCart) => {
-      const delBtns = document.getElementsByClassName("deleteItem");
-      const delBtnsArray = [...delBtns];
-
-      delBtnsArray.forEach((item, index) => {
-        item.addEventListener("click", function () {
-          delProduct(newCart[index].id);
-        });
-      });
-
-      const inputQté = document.getElementsByClassName("itemQuantity");
-      const inputQtéArray = [...inputQté];
-
-      inputQtéArray.forEach((item, index) => {
-        item.addEventListener("change", function (e) {
-          changeQte(e, newCart, index);
-        });
-      });
-    });
-  }
-};
-
-const createArticles = (product, item) => {
-  //HTML elements
   const cartItems = document.getElementById("cart__items");
 
   const article = document.createElement("ARTICLE");
@@ -114,13 +36,13 @@ const createArticles = (product, item) => {
   cartItemContentDescription.className = "cart__item__content__description";
 
   const name = document.createElement("h2");
-  name.innerHTML = product.name;
+  name.innerText = product.name;
 
   const color = document.createElement("p");
-  color.innerHTML = item.color;
+  color.innerText = item.color;
 
   const price = document.createElement("p");
-  price.innerHTML = product.price + " €";
+  price.innerText = product.price + " €";
 
   const cartItemContentSettings = document.createElement("div");
   cartItemContentSettings.className = "cart__item__content__settings";
@@ -130,7 +52,7 @@ const createArticles = (product, item) => {
     "cart__item__content__settings__quantity";
 
   const pQte = document.createElement("p");
-  pQte.innerHTML = "Qté : ";
+  pQte.innerText = "Qté : ";
 
   const inputNum = document.createElement("input");
   inputNum.type = "number";
@@ -144,9 +66,9 @@ const createArticles = (product, item) => {
   cartItemContentSettingsDelete.className =
     "cart__item__content__settings__delete";
 
-  const pDel = document.createElement("p");
-  pDel.innerHTML = "Supprimer";
-  pDel.className = "deleteItem";
+  const removeProduct = document.createElement("p");
+  removeProduct.innerText = "Supprimer";
+  removeProduct.className = "deleteItem";
 
   cartItems.appendChild(article);
   article.appendChild(cartItemImg);
@@ -161,75 +83,104 @@ const createArticles = (product, item) => {
   cartItemContentSettingsQuantity.appendChild(pQte);
   cartItemContentSettingsQuantity.appendChild(inputNum);
   cartItemContentSettings.appendChild(cartItemContentSettingsDelete);
-  cartItemContentSettingsDelete.appendChild(pDel);
+  cartItemContentSettingsDelete.appendChild(removeProduct);
 };
 
-// Calls
-const cart = getCart();
-createHTML(cart);
+const createTotalPrice = () => {
+  calculPrice().then((price) => {
+    const totalPrice = document.getElementById("totalPrice");
+    totalPrice.innerText = price;
+  });
+};
 
-const order = document.getElementsByTagName("form")[0];
-order.addEventListener("submit", (e) => {
-  e.preventDefault();
-  const firstName = document.getElementById("firstName").value;
-  const lastName = document.getElementById("lastName").value;
-  const address = document.getElementById("address").value;
-  const city = document.getElementById("city").value;
-  const email = document.getElementById("email").value;
+//Utils function
+const isDupplicate = (entry, newCart) => {
+  return newCart.some((x) => entry.id == x.id && entry.color == x.color);
+};
 
-  const firstNameError = document.getElementById("firstNameErrorMsg");
-  const lastNameError = document.getElementById("lastNameErrorMsg");
-  const addressError = document.getElementById("addressErrorMsg");
-  const cityError = document.getElementById("cityErrorMsg");
-  const emailError = document.getElementById("emailErrorMsg");
+const addQuantity = (entry, arr) => {
+  arr.forEach((x) => {
+    if (x.id === entry.id && x.color === entry.color) {
+      x.quantity = parseInt(x.quantity) + parseInt(entry.quantity);
+      x.quantity = x.quantity.toString();
+    }
+  });
+};
 
-  //Création objet fiche client
-  let contact = {
-    firstName: firstName,
-    lastName: lastName,
-    address: address,
-    city: city,
-    email: email,
-  };
-  // si formulaire vide
-  if (
-    firstName === "" ||
-    lastName === "" ||
-    address === "" ||
-    city === "" ||
-    email === ""
-  ) {
-    alert("Champs du formulaires vident !");
-    return;
+const delDupCart = () => {
+  let newCart = [];
+  for (const entry of cart) {
+    if (!isDupplicate(entry, newCart)) {
+      newCart.push(entry);
+    } else {
+      addQuantity(entry, newCart);
+    }
   }
-  // si données formulaires incorrect
-  if (
-    addressError == false ||
-    cityError == false ||
-    emailError == false ||
-    firstNameError == false ||
-    lastNameError == false
-  ) {
-    alert("Données du formulaires invalides !");
-  } else {
-    // si tout est ok
-    //Tableau avec ID
-    let products = cart.map((product) => product.id);
+  return newCart;
+};
 
-    fetch("http://localhost:3000/api/products/order", {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-type": "application/json",
-      },
-
-      body: JSON.stringify({ contact, products }),
-    })
-      .then((response) =>
-        response.json().then((data) => {
-          location.href = `confirmation.html?id=${data.orderId}`;
-        })
-      )
-      .catch((error) => error);
+const delProduct = (id) => {
+  for (let i = 0; i < cart.length; i++) {
+    if (cart[i].id === id) {
+      cart.splice(i, 1);
+    }
   }
-});
+  localStorage.setItem("cart", JSON.stringify(cart));
+  document.location.reload(true);
+};
+
+const calculPrice = async () => {
+  let result = 0;
+  for (let i = 0; i <= cart.length - 1; i++) {
+    const product = await fetchProduct(cart[i].id);
+    result += product.price * cart[i].quantity;
+  }
+  return result;
+};
+
+//App
+const createCart = () => {
+  createTotalPrice();
+
+  cart.forEach((item) => {
+    createArticles(item).then(() => {
+      const removeProduct = document.getElementsByClassName("deleteItem");
+      const removeProductArray = [...removeProduct];
+
+      removeProductArray.forEach((btn) => {
+        btn.addEventListener("click", function (e) {
+          const productDelID = e.target.closest(".cart__item").dataset.id;
+          const productDelColor = e.target.closest(".cart__item").dataset.color;
+          cart.forEach((el, index) => {
+            el.id === productDelID &&
+              el.color === productDelColor &&
+              cart.splice(index, 1);
+          });
+          localStorage.setItem("cart", JSON.stringify(cart));
+          e.target.closest(".cart__item").remove();
+        });
+      });
+
+      const changeQté = document.getElementsByClassName("itemQuantity");
+      const changeQtéArray = [...changeQté];
+
+      changeQtéArray.forEach((input, index) => {
+        input.addEventListener("change", function (e) {
+          const productID = e.target.closest(".cart__item").dataset.id;
+          const productColor = e.target.closest(".cart__item").dataset.color;
+          cart.forEach((el, index) => {
+            if (el.id === productID && el.color === productColor) {
+              cart[index].quantity = e.target.value.toString();
+            }
+          });
+          localStorage.setItem("cart", JSON.stringify(cart));
+          createTotalPrice();
+        });
+      });
+    });
+  });
+};
+
+var cart = getCart();
+cart = delDupCart();
+createCart();
