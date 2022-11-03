@@ -184,3 +184,154 @@ const createCart = () => {
 var cart = getCart();
 cart = delDupCart();
 createCart();
+
+//Order
+const order = document.getElementById("order");
+
+const firstName = document.getElementById("firstName");
+const lastName = document.getElementById("lastName");
+const address = document.getElementById("address");
+const city = document.getElementById("city");
+const email = document.getElementById("email");
+
+//Regex
+const regexName = /[^\p{L}\s-]/gmu;
+const regexAddress = /[^0-9\p{L},\s-]/gmu;
+const regexCity = /[^\p{L}\s-]/gmu;
+const regexMail = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+var testFirstName = false;
+var testLastName = false;
+var testAddress = false;
+var testCity = false;
+var testEmail = false;
+
+firstName.addEventListener("input", (eventInput) => {
+  const errorMSG = document.getElementById("firstNameErrorMsg");
+  const order = document.getElementById("order");
+
+  if (regexName.test(eventInput.target.value)) {
+    errorMSG.textContent = "Le champs est invalide";
+    order.setAttribute("disabled", true);
+  } else {
+    testFirstName = true;
+    errorMSG.textContent = null;
+    order.set;
+  }
+});
+
+lastName.addEventListener("input", (eventInput) => {
+  const errorMSG = document.getElementById("lastNameErrorMsg");
+  const order = document.getElementById("order");
+
+  if (regexName.test(eventInput.target.value)) {
+    errorMSG.textContent = "Le champs est invalide";
+    order.setAttribute("disabled", true);
+  } else {
+    testLastName = true;
+    errorMSG.textContent = null;
+    order.set;
+  }
+});
+
+address.addEventListener("input", (eventInput) => {
+  const errorMSG = document.getElementById("addressErrorMsg");
+  const order = document.getElementById("order");
+
+  if (regexAddress.test(eventInput.target.value)) {
+    errorMSG.textContent = "Le champs est invalide";
+    order.setAttribute("disabled", true);
+  } else {
+    testAddress = true;
+    errorMSG.textContent = null;
+    order.set;
+  }
+});
+
+city.addEventListener("input", (eventInput) => {
+  const errorMSG = document.getElementById("cityErrorMsg");
+  const order = document.getElementById("order");
+
+  if (regexName.test(eventInput.target.value)) {
+    errorMSG.textContent = "Le champs est invalide";
+    order.setAttribute("disabled", true);
+  } else {
+    testCity = true;
+    errorMSG.textContent = null;
+    order.set;
+  }
+});
+
+email.addEventListener("input", (eventInput) => {
+  const errorMSG = document.getElementById("emailErrorMsg");
+  const order = document.getElementById("order");
+
+  if (regexName.test(eventInput.target.value)) {
+    errorMSG.textContent = "Le champs est invalide";
+    order.setAttribute("disabled", true);
+    console.log('wrong')
+  } else {
+    console.log('good')
+    testEmail = true;
+    errorMSG.textContent = null;
+    order.set;
+  }
+});
+
+//Confirmation order
+order.addEventListener("click", (e) => {
+  e.preventDefault();
+
+  //Création objet fiche client
+  let contact = {
+    firstName: firstName.value,
+    lastName: lastName.value,
+    address: address.value,
+    city: city.value,
+    email: email.value,
+  };
+
+  console.log(contact);
+  // si formulaire vide
+  if (
+    firstName.value === "" ||
+    lastName.value === "" ||
+    address.value === "" ||
+    city.value === "" ||
+    email.value === ""
+  ) {
+    alert("Champs du formulaires vident !");
+    return;
+  }
+  // si données formulaires incorrect
+  if (
+    testAddress == false ||
+    testCity == false ||
+    testEmail == false ||
+    testFirstName == false ||
+    testLastName == false
+  ) {
+    alert("Données du formulaires invalides !");
+  } else {
+    // si tout est ok
+    //Tableau avec ID
+    let products = panierStorage.map((product) => product.id);
+
+    fetch("http://localhost:3000/api/products/order", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-type": "application/json",
+      },
+
+      body: JSON.stringify({ contact, products }),
+    })
+      .then((response) =>
+        response.json().then((data) => {
+          location.href = `confirmation.html?id=${data.orderId}`;
+          console.log(data.orderId);
+        })
+      )
+      .catch((error) => error);
+  }
+});
