@@ -198,7 +198,7 @@ const email = document.getElementById("email");
 const regexName = new RegExp("[^p{L}s-]");
 const regexAddress = new RegExp("[^0-9p{L},s-]");
 const regexCity = new RegExp("[^p{L}s-]");
-const regexMail = new RegExp("[\w-]+@([\w-]+\.)+[\w-]+");
+const regexMail = new RegExp(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1, 3}\.[0-9]{1, 3}\.[0-9]{1, 3}\.[0-9]{1, 3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
 
 //Confirmation order
 order.addEventListener("click", (e) => {
@@ -231,7 +231,6 @@ order.addEventListener("click", (e) => {
     email: email.value,
   };
 
-  console.log(contact);
   // si formulaire vide
   if (
     firstName.value === "" &&
@@ -259,7 +258,7 @@ order.addEventListener("click", (e) => {
   } else {
     // si tout est ok
     //Tableau avec ID
-    let products = panierStorage.map((product) => product.id);
+    let products = cart.map((product) => product.id);
 
     fetch("http://localhost:3000/api/products/order", {
       method: "POST",
