@@ -195,92 +195,32 @@ const city = document.getElementById("city");
 const email = document.getElementById("email");
 
 //Regex
-const regexName = /[^\p{L}\s-]/gmu;
-const regexAddress = /[^0-9\p{L},\s-]/gmu;
-const regexCity = /[^\p{L}\s-]/gmu;
-const regexMail = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-
-var testFirstName = false;
-var testLastName = false;
-var testAddress = false;
-var testCity = false;
-var testEmail = false;
-
-firstName.addEventListener("input", (eventInput) => {
-  const errorMSG = document.getElementById("firstNameErrorMsg");
-  const order = document.getElementById("order");
-
-  if (regexName.test(eventInput.target.value)) {
-    errorMSG.textContent = "Le champs est invalide";
-    order.setAttribute("disabled", true);
-  } else {
-    testFirstName = true;
-    errorMSG.textContent = null;
-    order.set;
-  }
-});
-
-lastName.addEventListener("input", (eventInput) => {
-  const errorMSG = document.getElementById("lastNameErrorMsg");
-  const order = document.getElementById("order");
-
-  if (regexName.test(eventInput.target.value)) {
-    errorMSG.textContent = "Le champs est invalide";
-    order.setAttribute("disabled", true);
-  } else {
-    testLastName = true;
-    errorMSG.textContent = null;
-    order.set;
-  }
-});
-
-address.addEventListener("input", (eventInput) => {
-  const errorMSG = document.getElementById("addressErrorMsg");
-  const order = document.getElementById("order");
-
-  if (regexAddress.test(eventInput.target.value)) {
-    errorMSG.textContent = "Le champs est invalide";
-    order.setAttribute("disabled", true);
-  } else {
-    testAddress = true;
-    errorMSG.textContent = null;
-    order.set;
-  }
-});
-
-city.addEventListener("input", (eventInput) => {
-  const errorMSG = document.getElementById("cityErrorMsg");
-  const order = document.getElementById("order");
-
-  if (regexName.test(eventInput.target.value)) {
-    errorMSG.textContent = "Le champs est invalide";
-    order.setAttribute("disabled", true);
-  } else {
-    testCity = true;
-    errorMSG.textContent = null;
-    order.set;
-  }
-});
-
-email.addEventListener("input", (eventInput) => {
-  const errorMSG = document.getElementById("emailErrorMsg");
-  const order = document.getElementById("order");
-
-  if (regexName.test(eventInput.target.value)) {
-    errorMSG.textContent = "Le champs est invalide";
-    order.setAttribute("disabled", true);
-    console.log('wrong')
-  } else {
-    console.log('good')
-    testEmail = true;
-    errorMSG.textContent = null;
-    order.set;
-  }
-});
+const regexName = new RegExp("[^p{L}s-]");
+const regexAddress = new RegExp("[^0-9p{L},s-]");
+const regexCity = new RegExp("[^p{L}s-]");
+const regexMail = new RegExp("[\w-]+@([\w-]+\.)+[\w-]+");
 
 //Confirmation order
 order.addEventListener("click", (e) => {
   e.preventDefault();
+
+  const errorFN = document.getElementById("firstNameErrorMsg");
+  const errorLN = document.getElementById("lastNameErrorMsg");
+  const errorAddress = document.getElementById("addressErrorMsg");
+  const errorCity = document.getElementById("cityErrorMsg");
+  const errorMail = document.getElementById("emailErrorMsg");
+
+  errorFN.textContent = "";
+  errorLN.textContent = "";
+  errorAddress.textContent = "";
+  errorCity.textContent = "";
+  errorMail.textContent = "";
+
+  const testFirstName = regexName.test(firstName.value);
+  const testLastName = regexName.test(lastName.value);
+  const testAddress = regexAddress.test(address.value);
+  const testEmail = regexMail.test(email.value);
+  const testCity = regexCity.test(city.value);
 
   //Création objet fiche client
   let contact = {
@@ -294,10 +234,10 @@ order.addEventListener("click", (e) => {
   console.log(contact);
   // si formulaire vide
   if (
-    firstName.value === "" ||
-    lastName.value === "" ||
-    address.value === "" ||
-    city.value === "" ||
+    firstName.value === "" &&
+    lastName.value === "" &&
+    address.value === "" &&
+    city.value === "" &&
     email.value === ""
   ) {
     alert("Champs du formulaires vident !");
@@ -305,13 +245,17 @@ order.addEventListener("click", (e) => {
   }
   // si données formulaires incorrect
   if (
-    testAddress == false ||
-    testCity == false ||
-    testEmail == false ||
-    testFirstName == false ||
-    testLastName == false
+    !testFirstName ||
+    !testLastName ||
+    !testAddress ||
+    !testCity ||
+    !testEmail
   ) {
-    alert("Données du formulaires invalides !");
+    !testFirstName ? (errorFN.textContent = "Le champs est invalide") : null;
+    !testLastName ? (errorLN.textContent = "Le champs est invalide") : null;
+    !testAddress ? (errorAddress.textContent = "Le champs est invalide") : null;
+    !testCity ? (errorCity.textContent = "Le champs est invalide") : null;
+    !testEmail ? (errorMail.textContent = "Le champs est invalide") : null;
   } else {
     // si tout est ok
     //Tableau avec ID
