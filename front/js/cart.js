@@ -109,13 +109,16 @@ const addQuantity = (entry, arr) => {
 
 const delDupCart = () => {
   let newCart = [];
-  for (const entry of cart) {
-    if (!isDupplicate(entry, newCart)) {
-      newCart.push(entry);
-    } else {
-      addQuantity(entry, newCart);
+  if (cart) {
+    for (const entry of cart) {
+      if (!isDupplicate(entry, newCart)) {
+        newCart.push(entry);
+      } else {
+        addQuantity(entry, newCart);
+      }
     }
   }
+
   return newCart;
 };
 
@@ -142,43 +145,50 @@ const calculPrice = async () => {
 const createCart = () => {
   createTotalPrice();
 
-  cart.forEach((item) => {
-    createArticles(item).then(() => {
-      const removeProduct = document.getElementsByClassName("deleteItem");
-      const removeProductArray = [...removeProduct];
+  if(cart.length === 0){
+    document.getElementById("order").disabled = true;
+  }
 
-      removeProductArray.forEach((btn) => {
-        btn.addEventListener("click", function (e) {
-          const productDelID = e.target.closest(".cart__item").dataset.id;
-          const productDelColor = e.target.closest(".cart__item").dataset.color;
-          cart.forEach((el, index) => {
-            el.id === productDelID &&
-              el.color === productDelColor &&
-              cart.splice(index, 1);
+  cart &&
+    cart.forEach((item) => {
+      createArticles(item).then(() => {
+        const removeProduct = document.getElementsByClassName("deleteItem");
+        const removeProductArray = [...removeProduct];
+
+        removeProductArray.forEach((btn) => {
+          btn.addEventListener("click", function (e) {
+            const productDelID = e.target.closest(".cart__item").dataset.id;
+            const productDelColor =
+              e.target.closest(".cart__item").dataset.color;
+            cart.forEach((el, index) => {
+              el.id === productDelID &&
+                el.color === productDelColor &&
+                cart.splice(index, 1);
+            });
+            localStorage.setItem("cart", JSON.stringify(cart));
+            e.target.closest(".cart__item").remove();
+            createTotalPrice();
           });
-          localStorage.setItem("cart", JSON.stringify(cart));
-          e.target.closest(".cart__item").remove();
         });
-      });
 
-      const changeQté = document.getElementsByClassName("itemQuantity");
-      const changeQtéArray = [...changeQté];
+        const changeQté = document.getElementsByClassName("itemQuantity");
+        const changeQtéArray = [...changeQté];
 
-      changeQtéArray.forEach((input) => {
-        input.addEventListener("change", function (e) {
-          const productID = e.target.closest(".cart__item").dataset.id;
-          const productColor = e.target.closest(".cart__item").dataset.color;
-          cart.forEach((el, index) => {
-            if (el.id === productID && el.color === productColor) {
-              cart[index].quantity = e.target.value.toString();
-            }
+        changeQtéArray.forEach((input) => {
+          input.addEventListener("change", function (e) {
+            const productID = e.target.closest(".cart__item").dataset.id;
+            const productColor = e.target.closest(".cart__item").dataset.color;
+            cart.forEach((el, index) => {
+              if (el.id === productID && el.color === productColor) {
+                cart[index].quantity = e.target.value.toString();
+              }
+            });
+            localStorage.setItem("cart", JSON.stringify(cart));
+            createTotalPrice();
           });
-          localStorage.setItem("cart", JSON.stringify(cart));
-          createTotalPrice();
         });
       });
     });
-  });
 };
 
 var cart = getCart();
@@ -198,7 +208,9 @@ const email = document.getElementById("email");
 const regexName = new RegExp("[^p{L}s-]");
 const regexAddress = new RegExp("[^0-9p{L},s-]");
 const regexCity = new RegExp("[^p{L}s-]");
-const regexMail = new RegExp(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1, 3}\.[0-9]{1, 3}\.[0-9]{1, 3}\.[0-9]{1, 3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
+const regexMail = new RegExp(
+  /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1, 3}\.[0-9]{1, 3}\.[0-9]{1, 3}\.[0-9]{1, 3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+);
 
 //Confirmation order
 order.addEventListener("click", (e) => {
