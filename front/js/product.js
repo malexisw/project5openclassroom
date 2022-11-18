@@ -43,22 +43,27 @@ const addToCart = async () => {
   const quantity = document.getElementById("quantity").value;
   const color = document.getElementById("colors").value;
 
-  let currentCart = [];
-  if (localStorage.getItem("cart") !== null) {
-    currentCart = JSON.parse(localStorage.getItem("cart"));
+  console.log(color)
+
+  if(color && quantity > 0){
+    let currentCart = [];
+    if (localStorage.getItem("cart") !== null) {
+      currentCart = JSON.parse(localStorage.getItem("cart"));
+    }
+  
+    const cartProduct = {
+      id: id,
+      quantity: quantity,
+      color: color,
+    };
+  
+    currentCart.push(cartProduct);
+  
+    localStorage.setItem("cart", JSON.stringify(currentCart));
+  
+    location.href = 'http://127.0.0.1:5500/front/html/index.html';
   }
-
-  const cartProduct = {
-    id: id,
-    quantity: quantity,
-    color: color,
-  };
-
-  currentCart.push(cartProduct);
-
-  localStorage.setItem("cart", JSON.stringify(currentCart));
-
-  location.href = 'http://127.0.0.1:5500/front/html/index.html';
+  
 };
 
 createHTML();
