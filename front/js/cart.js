@@ -11,8 +11,35 @@ const fetchProduct = async (id) => {
   return await fetch(url).then((response) => response.json());
 };
 
-//Create HTML functions
-const createArticles = async (item) => {
+// On change quantity update the quantity in the localStorage
+const onChangeQty = (e) => {
+  const productID = e.target.closest(".cart__item").dataset.id;
+  const productColor = e.target.closest(".cart__item").dataset.color;
+  cart.forEach((el, index) => {
+    if (el.id === productID && el.color === productColor) {
+      cart[index].quantity = e.target.value.toString();
+    }
+  });
+  localStorage.setItem("cart", JSON.stringify(cart));
+  createTotalPrice();
+};
+
+// On click the del button delete the item in the HTML elements && the localStorage
+const onClickDel = (e) => {
+  const productDelID = e.target.closest(".cart__item").dataset.id;
+  const productDelColor = e.target.closest(".cart__item").dataset.color;
+  cart.forEach((el, index) => {
+    el.id === productDelID &&
+      el.color === productDelColor &&
+      cart.splice(index, 1);
+  });
+  localStorage.setItem("cart", JSON.stringify(cart));
+  e.target.closest(".cart__item").remove();
+  createTotalPrice();
+};
+
+// Create the HTML elements for one article of the cart
+const createArticle = async (item) => {
   const product = await fetchProduct(item.id);
 
   const cartItems = document.getElementById("cart__items");
@@ -61,14 +88,19 @@ const createArticles = async (item) => {
   inputNum.min = 1;
   inputNum.max = 100;
   inputNum.value = item.quantity;
+  inputNum.addEventListener("change", function (e) {
+    onChangeQty(e);
+  });
 
   const cartItemContentSettingsDelete = document.createElement("div");
   cartItemContentSettingsDelete.className =
     "cart__item__content__settings__delete";
-
   const removeProduct = document.createElement("p");
   removeProduct.innerText = "Supprimer";
   removeProduct.className = "deleteItem";
+  removeProduct.addEventListener("click", function (e) {
+    onClickDel(e);
+  });
 
   cartItems.appendChild(article);
   article.appendChild(cartItemImg);
@@ -86,6 +118,7 @@ const createArticles = async (item) => {
   cartItemContentSettingsDelete.appendChild(removeProduct);
 };
 
+// Calcul the total price of the cart
 const createTotalPrice = () => {
   calculPrice().then((price) => {
     const totalPrice = document.getElementById("totalPrice");
@@ -93,11 +126,12 @@ const createTotalPrice = () => {
   });
 };
 
-//Utils function
+// Looks if there is a dupplicate
 const isDupplicate = (entry, newCart) => {
   return newCart.some((x) => entry.id == x.id && entry.color == x.color);
 };
 
+// Add quantity to product
 const addQuantity = (entry, arr) => {
   arr.forEach((x) => {
     if (x.id === entry.id && x.color === entry.color) {
@@ -107,6 +141,7 @@ const addQuantity = (entry, arr) => {
   });
 };
 
+// Delete cart's dupplicate if color && id are the same
 const delDupCart = () => {
   let newCart = [];
   if (cart) {
@@ -122,6 +157,7 @@ const delDupCart = () => {
   return newCart;
 };
 
+// Delete one product
 const delProduct = (id) => {
   for (let i = 0; i < cart.length; i++) {
     if (cart[i].id === id) {
@@ -132,6 +168,7 @@ const delProduct = (id) => {
   document.location.reload(true);
 };
 
+// Calcul the price of one product
 const calculPrice = async () => {
   let result = 0;
   for (let i = 0; i <= cart.length - 1; i++) {
@@ -141,53 +178,17 @@ const calculPrice = async () => {
   return result;
 };
 
-//App
+//Create the HTML elements for the cart
 const createCart = () => {
   createTotalPrice();
 
-  if(cart.length === 0){
+  if (cart.length === 0) {
     document.getElementById("order").disabled = true;
   }
 
   cart &&
     cart.forEach((item) => {
-      createArticles(item).then(() => {
-        const removeProduct = document.getElementsByClassName("deleteItem");
-        const removeProductArray = [...removeProduct];
-
-        removeProductArray.forEach((btn) => {
-          btn.addEventListener("click", function (e) {
-            const productDelID = e.target.closest(".cart__item").dataset.id;
-            const productDelColor =
-              e.target.closest(".cart__item").dataset.color;
-            cart.forEach((el, index) => {
-              el.id === productDelID &&
-                el.color === productDelColor &&
-                cart.splice(index, 1);
-            });
-            localStorage.setItem("cart", JSON.stringify(cart));
-            e.target.closest(".cart__item").remove();
-            createTotalPrice();
-          });
-        });
-
-        const changeQté = document.getElementsByClassName("itemQuantity");
-        const changeQtéArray = [...changeQté];
-
-        changeQtéArray.forEach((input) => {
-          input.addEventListener("change", function (e) {
-            const productID = e.target.closest(".cart__item").dataset.id;
-            const productColor = e.target.closest(".cart__item").dataset.color;
-            cart.forEach((el, index) => {
-              if (el.id === productID && el.color === productColor) {
-                cart[index].quantity = e.target.value.toString();
-              }
-            });
-            localStorage.setItem("cart", JSON.stringify(cart));
-            createTotalPrice();
-          });
-        });
-      });
+      createArticle(item);
     });
 };
 
@@ -204,7 +205,7 @@ const address = document.getElementById("address");
 const city = document.getElementById("city");
 const email = document.getElementById("email");
 
-//Regex
+//Regex for the form
 const regexName = new RegExp("[^p{L}s-]");
 const regexAddress = new RegExp("[^0-9p{L},s-]");
 const regexCity = new RegExp("[^p{L}s-]");
